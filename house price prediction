@@ -1,0 +1,54 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+
+class LinearRegression:
+    def __init__(self, learning_rate=0.01, iterations=1000):
+        self.learning_rate = learning_rate
+        self.iterations = iterations
+        self.weights = None
+        self.bias = None
+    
+    def fit(self, X, y):
+        num_samples, num_features = X.shape
+        self.weights = np.zeros(num_features)
+        print(self.weights)
+        self.bias = 0
+        for _ in range(self.iterations):
+            y_pred = self.predict(X)
+            dw = (1/num_samples) * np.dot(X.T, (y_pred - y))
+            db = (1/num_samples) * np.sum((y_pred - y))
+            self.weights -= self.learning_rate * dw
+            self.bias -= self.learning_rate * db
+    
+    def predict(self, X):
+        return np.dot(X, self.weights) + self.bias
+
+
+data = pd.read_csv('housing.csv')
+
+
+X_original = data['area'].values.reshape(-1, 1)
+y_original = data['price'].values
+X = (X_original - np.mean(X_original)) / np.std(X_original)
+y = (y_original - np.mean(y_original)) / np.std(y_original)
+print(y.ndim)
+
+model = LinearRegression(learning_rate=0.01, iterations=1000)
+model.fit(X, y)
+
+
+predictions_normalized = model.predict(X)
+predictions_denormalized = predictions_normalized * np.std(y_original) + np.mean(y_original)
+
+
+plt.figure(figsize=(10, 6))
+plt.scatter(X_original, y_original, alpha=0.5, label='Data points')
+plt.plot(X_original, predictions_denormalized, 'r', label='Regression line')
+plt.title('House Price vs. Area with Linear Regression Line')
+plt.xlabel('Area')
+plt.ylabel('Price')
+plt.legend()
+plt.grid(True)
+plt.show()
